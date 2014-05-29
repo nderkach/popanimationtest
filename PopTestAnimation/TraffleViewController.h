@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TraffleViewController : UIViewController
+@interface TraffleViewController : UITableViewController <UITableViewDelegate, UITableViewDataSource>
 
 @end
