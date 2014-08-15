@@ -87,5 +87,10 @@ static float delay = 0.0f;
     NSLog(@"cell: %@ %d %d", cell.textLabel.text, [anim.name intValue], cell.hidden);
 }
 
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 100.0f;
+}
+
 
 @end
