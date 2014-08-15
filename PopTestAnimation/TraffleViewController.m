@@ -10,7 +10,7 @@
 
 #import <POP.h>
 
-static int delay = 0;
+static float delay = 0.0f;
 
 @interface TraffleViewController ()
 
@@ -33,39 +33,58 @@ static int delay = 0;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
+    NSLog(@"cellForRowAtIndexPath: %ld", (long)[indexPath row]);
+    NSString *CellIdentifier = [NSString stringWithFormat:@"%ld", (long)[indexPath row]];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    
+        // Configure the cell
+        cell.textLabel.text = [NSString stringWithFormat:@"test %f", delay];
+        cell.textLabel.textAlignment = NSTextAlignmentCenter;
+        
+        CGFloat toValue = CGRectGetMidX(self.view.bounds);
+        
+        POPSpringAnimation *onscreenAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPositionX];
+        onscreenAnimation.fromValue = @(-toValue);
+        onscreenAnimation.toValue = @(toValue);
+        onscreenAnimation.springBounciness = 5.0f;
+        onscreenAnimation.beginTime = (CACurrentMediaTime() + delay);
+        onscreenAnimation.delegate = self;
+        onscreenAnimation.name = [NSString stringWithFormat:@"%ld", (long)[indexPath row]];
+        delay+=0.7f;
+        
+        cell.hidden = YES;
+        
+        [cell.layer pop_addAnimation:onscreenAnimation forKey:onscreenAnimation.name];
     }
-    
-    // Configure the cell
-    cell.textLabel.text = @"test";
-    cell.textLabel.textAlignment = NSTextAlignmentCenter;
-    
-    CGFloat toValue = CGRectGetMidX(self.view.bounds);
-
-    POPSpringAnimation *onscreenAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPositionX];
-    onscreenAnimation.fromValue = @(-toValue);
-    onscreenAnimation.toValue = @(toValue);
-    onscreenAnimation.springBounciness = 5.f;
-    onscreenAnimation.beginTime = (CACurrentMediaTime() + delay);
-    delay++;
-
-    [cell.layer pop_addAnimation:onscreenAnimation forKey:onscreenAnimation.name];
 
     return cell;
 }
 
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSLog(@"Displaying row: %ld", (long)[indexPath row]);
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    NSLog(@"numberOfSectionsInTableView");
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    NSLog(@"numberOfRowsInSection");
     return 3;
+}
+
+-(void)pop_animationDidStart:(POPAnimation *)anim
+{
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath: [NSIndexPath indexPathForRow:[anim.name intValue] inSection:0]];
+    cell.hidden = NO;
+    NSLog(@"cell: %@ %d %d", cell.textLabel.text, [anim.name intValue], cell.hidden);
 }
 
 
